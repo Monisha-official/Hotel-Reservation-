@@ -677,6 +677,35 @@ function initSearchEngine() {
       };
     }
   });
+
+  // Check URL parameters for seamless search from index.html
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const qParam = urlParams.get("query") || urlParams.get("hotel") || urlParams.get("city") || "";
+    const catParam = urlParams.get("category") || "";
+    const checkinParam = urlParams.get("checkin");
+    const checkoutParam = urlParams.get("checkout");
+
+    if (checkinParam && checkinInput) checkinInput.value = checkinParam;
+    if (checkoutParam && checkoutInput) checkoutInput.value = checkoutParam;
+
+    const smartInput = document.getElementById("smartSearchInput");
+    if (qParam && smartInput) {
+      smartInput.value = qParam;
+    }
+    if (catParam) {
+      const roomTypeSelect = document.getElementById("roomType");
+      if (roomTypeSelect) roomTypeSelect.value = catParam;
+    }
+
+    if (qParam || catParam || checkinParam) {
+      setTimeout(() => {
+        executeHotelSearch(false);
+      }, 500);
+    }
+  } catch (err) {
+    console.warn("URL params parse note:", err);
+  }
 }
 
 // Main execution routine
@@ -955,14 +984,28 @@ function centerHotelOnMap(lat, lng, name) {
   }
 }
 
-// Select Room and Scroll to Reservation Form
+// Select Room and Navigate / Update Booking Form
 function selectRoomForReservation(hotelJsonEncoded, rtJsonEncoded) {
   try {
     const hotel = JSON.parse(decodeURIComponent(hotelJsonEncoded));
     const rt = JSON.parse(decodeURIComponent(rtJsonEncoded));
-    selectedRoomData = { hotel, rt };
+    const checkin = document.getElementById("checkinDate")?.value || "";
+    const checkout = document.getElementById("checkoutDate")?.value || "";
+    const numGuests = document.getElementById("numGuests")?.value || "1";
 
-    // Update display banner
+    selectedRoomData = { hotel, rt, checkin, checkout, numGuests };
+
+    // Save selection in sessionStorage for the dedicated Booking Module
+    sessionStorage.setItem("selectedRoomData", JSON.stringify(selectedRoomData));
+
+    // If on availability.html or index.html, redirect smoothly to booking.html
+    const currentPath = window.location.pathname.toLowerCase();
+    if (!currentPath.includes("booking.html") || currentPath.includes("availability.html")) {
+      window.location.href = `booking.html?hotelId=${hotel.id}&roomTypeId=${rt.id}&checkin=${encodeURIComponent(checkin)}&checkout=${encodeURIComponent(checkout)}`;
+      return;
+    }
+
+    // If already on booking.html, update form in place
     const titleEl = document.getElementById("selectedRoomDisplayTitle");
     const locEl = document.getElementById("selectedRoomDisplayLocation");
     const priceEl = document.getElementById("selectedRoomDisplayPrice");
@@ -981,8 +1024,11 @@ function selectRoomForReservation(hotelJsonEncoded, rtJsonEncoded) {
     if (rtIdInput) rtIdInput.value = rt.id;
     if (rtBasePriceInput) rtBasePriceInput.value = rt.price;
 
-    // Scroll down to reservation form
-    const formSection = document.getElementById("bookingReservationSection");
+    if (typeof recalculateCheckoutBill === "function") {
+      recalculateCheckoutBill();
+    }
+
+    const formSection = document.getElementById("bookingReservationSection") || document.getElementById("bookingForm");
     if (formSection) {
       formSection.scrollIntoView({ behavior: "smooth" });
     }

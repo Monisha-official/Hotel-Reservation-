@@ -3,63 +3,123 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Web-Based Hotel Reservation</title>
-  <link rel="stylesheet" href="./style.css" />
+  <title>HotelEase — Web-Based Hotel Reservation</title>
+  <link rel="stylesheet" href="./style.css?v=3.0" />
+  <style>
+    /* Resilient Hero Styles matching reference image */
+    .hero {
+      height: 100vh !important;
+      min-height: 100vh !important;
+      width: 100% !important;
+      background: linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.45)),
+                  url('./hero-bg.jpg') center/cover no-repeat,
+                  url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1920&q=80') center/cover no-repeat !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      text-align: center !important;
+      position: relative !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .hero-content {
+      position: relative !important;
+      z-index: 5 !important;
+      max-width: 800px !important;
+      padding: 0 20px !important;
+      text-align: center !important;
+      margin: 0 auto !important;
+    }
+    .hero-content h1 {
+      font-size: clamp(2.2em, 4.2vw, 3.5em) !important;
+      font-weight: 700 !important;
+      color: #ffffff !important;
+      margin-bottom: 18px !important;
+      letter-spacing: -0.5px !important;
+      text-shadow: 0 3px 15px rgba(0, 0, 0, 0.7) !important;
+    }
+    .hero-content p {
+      font-size: clamp(1.05em, 1.8vw, 1.25em) !important;
+      color: #ffffff !important;
+      margin-bottom: 28px !important;
+      line-height: 1.6 !important;
+      max-width: 680px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7) !important;
+    }
+    .hero-content .btn {
+      background: #00adb5 !important;
+      color: #ffffff !important;
+      padding: 13px 36px !important;
+      border: none !important;
+      border-radius: 30px !important;
+      font-size: 1.05em !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      text-decoration: none !important;
+      display: inline-block !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+      transition: all 0.3s ease !important;
+    }
+    .hero-content .btn:hover {
+      background: #08d9d6 !important;
+      transform: scale(1.05) !important;
+    }
+  </style>
 </head>
 <body>
+
+  <!-- Navigation Bar -->
   <header class="navbar">
-    <div class="logo">Hotel<span>Ease</span></div>
+    <a href="index.html" class="logo">Hotel<span>Ease</span></a>
     <nav>
       <ul>
         <li><a href="index.html" class="active">Home</a></li>
-        <li><a href="booking.html">Book</a></li>
+        <li><a href="availability.html">Book</a></li>
         <li><a href="features.html">Features</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <li><a href="admin.html">Admin</a></li>
       </ul>
     </nav>
   </header>
 
+  <!-- Fullscreen Hero Landing matching reference -->
   <section id="home" class="hero">
     <div class="hero-content">
       <h1>Smart. Simple. Contactless.</h1>
       <p>Experience quick and hassle-free hotel booking with our digital reservation platform.</p>
-      <a href="booking.html" class="btn">Book Now</a>
+      <a href="availability.html" class="btn">Book Now</a>
     </div>
   </section>
 
+  <!-- Chatbot Floating Button -->
+  <div id="chatbot-toggle">💬</div>
 
-  <footer>
-    <p>© 2025 HotelEase | Developed by Code Alchemists Team</p>
-  </footer>
-  <!-- Chatbot Button -->
-<div id="chatbot-toggle">💬</div>
+  <!-- Chatbot Window -->
+  <div id="chatbot">
+    <div id="chatbot-header">
+      <span>HotelEase AI Assistant</span>
+      <button id="chatbot-close">×</button>
+    </div>
 
-<!-- Chatbot Window -->
-<div id="chatbot">
-  <div id="chatbot-header">
-    <span>HotelEase AI Assistant</span>
-    <button id="chatbot-close">×</button>
-  </div>
+    <div id="chatbot-messages">
+      <div class="bot-message">
+        Hello! I'm your HotelEase AI assistant. I can help you with customer issues, food recommendations, and service status. How can I assist you today?
+      </div>
+    </div>
 
-  <div id="chatbot-messages">
-    <div class="bot-message">
-      Hello! I'm your HotelEase AI assistant. I can help you with customer issues, food recommendations, and service status. How can I assist you today?
+    <div id="chatbot-input-area">
+      <input
+        type="text"
+        id="chatbot-input"
+        placeholder="Ask me anything about customer issues..."
+      />
+      <button id="chatbot-send">➤</button>
     </div>
   </div>
 
-  <div id="chatbot-input-area">
-    <input
-      type="text"
-      id="chatbot-input"
-      placeholder="Ask me anything about customer issues..."
-    />
-    <button id="chatbot-send">➤</button>
-  </div>
-</div>
-
-<script src="./script.js"></script>
+  <script src="./script.js"></script>
 
 </body>
 </html>
