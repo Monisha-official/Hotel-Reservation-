@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Dashboard - HotelEase</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .dashboard-container {
+      padding: 120px 40px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .profile-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(8, 217, 214, 0.25);
+      border-radius: 18px;
+      padding: 25px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 35px;
+    }
+    .booking-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    .my-booking-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(8, 217, 214, 0.2);
+      border-radius: 16px;
+      padding: 22px;
+      transition: all 0.3s ease;
+    }
+    .my-booking-card:hover {
+      border-color: #08d9d6;
+      transform: translateY(-4px);
+    }
+    .qr-box {
+      background: white;
+      color: black;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      margin: 15px 0;
+      font-family: monospace;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">Hotel<span>Ease</span></div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="booking.html">Book</a></li>
+        <li><a href="features.html">Features</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="user-dashboard.html" class="active">My Dashboard</a></li>
+        <li id="navAdminLink" style="display:none;"><a href="admin.html">Admin Desk</a></li>
+        <li><button onclick="logoutUser()" class="btn" style="padding:6px 16px; font-size:0.9em; background:#e74c3c;">Logout</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="dashboard-container">
+    <!-- User Profile Header -->
+    <div class="profile-card">
+      <div>
+        <h2 style="color:#08d9d6; margin:0;" id="userName">Welcome Guest</h2>
+        <p style="color:#aaa; margin-top:4px;" id="userEmail">guest@example.com</p>
+      </div>
+      <div>
+        <span style="background:rgba(8,217,214,0.15); border:1px solid #08d9d6; color:#08d9d6; padding:6px 14px; border-radius:20px; font-weight:bold; font-size:0.9em;" id="userRoleBadge">CUSTOMER</span>
+      </div>
+    </div>
+
+    <!-- Active Reservations (Own Data Only) -->
+    <h3 style="color:#08d9d6; margin-bottom:15px;">📋 My Active Reservations</h3>
+    <div id="myBookingsContainer">
+      <p style="color:#aaa;">Loading your bookings...</p>
+    </div>
+
+    <!-- Guest Service Complaint Request -->
+    <div style="margin-top: 50px; background: rgba(255,255,255,0.03); border:1px solid rgba(8,217,214,0.2); border-radius:18px; padding:30px;">
+      <h3 style="color:#08d9d6; margin-bottom:10px;">🛠️ Request Room Service or Maintenance</h3>
+      <p style="color:#aaa; font-size:0.95em; margin-bottom:20px;">Have an issue with AC, WiFi, housekeeping, or room service during your stay? Submit a ticket below:</p>
+      
+      <form id="userComplaintForm" style="margin:0; background:transparent; border:none; padding:0; box-shadow:none;">
+        <div style="display:grid; grid-template-columns: 1fr 2fr; gap:15px; margin-bottom:15px;">
+          <input type="text" id="ticketRoom" placeholder="Room Number (e.g. 104)" required />
+          <input type="text" id="ticketDesc" placeholder="Describe issue (e.g. AC cooling slow, extra towels needed)" required />
+        </div>
+        <button type="submit" class="btn" style="background:#00adb5;">Submit Service Ticket</button>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 HotelEase | Developed by Code Alchemists Team</p>
+  </footer>
+
+  <script src="./script.js"></script>
+  <script>
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+
+    if (!currentUser) {
+      alert("Please log in to access your dashboard.");
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("userName").textContent = "Welcome, " + currentUser.name;
+      document.getElementById("userEmail").textContent = currentUser.email;
+      document.getElementById("userRoleBadge").textContent = "ROLE: " + currentUser.role;
+
+      if (currentUser.role === "ADMIN" || currentUser.role === "STAFF") {
+        document.getElementById("navAdminLink").style.display = "inline";
+      }
+
+      loadMyBookings(currentUser.email);
+    }
+
+    async function loadMyBookings(email) {
+      const container = document.getElementById("myBookingsContainer");
+      try {
+        const res = await fetch(`http://localhost:8085/api/bookings/my-bookings?email=${encodeURIComponent(email)}`);
+        if (!res.ok) throw new Error("Failed to load bookings");
+        const bookings = await res.json();
+
+        if (bookings && bookings.length > 0) {
+          container.className = "booking-grid";
+          container.innerHTML = bookings.map(b => `
+            <div class="my-booking-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <strong style="color:#08d9d6; font-size:1.1em;">${b.bookingCode}</strong>
+                <span style="background:rgba(46,204,113,0.15); color:#2ecc71; border:1px solid #2ecc71; padding:3px 8px; border-radius:10px; font-size:0.8em; font-weight:bold;">${b.status}</span>
+              </div>
+              <p style="margin:4px 0; color:#ddd;"><strong>Hotel:</strong> ${b.hotel ? b.hotel.name : b.location}</p>
+              <p style="margin:4px 0; color:#ddd;"><strong>Room Type:</strong> ${b.roomType ? b.roomType.name : b.roomTypeString}</p>
+              <p style="margin:4px 0; color:#aaa; font-size:0.9em;"><strong>Dates:</strong> ${b.checkinDate} ➔ ${b.checkoutDate}</p>
+              <p style="margin:4px 0; color:#aaa; font-size:0.9em;"><strong>Rooms:</strong> ${b.numRooms} | Guests: ${b.numGuests}</p>
+              
+              <div class="qr-box">
+                <div style="font-size:0.75em; color:#555;">📲 QR CHECK-IN PASS</div>
+                <div style="color:#00adb5; font-size:1.1em; letter-spacing:1px;">${b.qrCodeToken || ('QR-' + b.bookingCode)}</div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+                <strong style="color:white; font-size:1.1em;">Total: ₹${b.totalCost.toLocaleString('en-IN')}</strong>
+                ${b.status !== 'CANCELLED' && b.status !== 'CHECKED_OUT' ? `<button onclick="cancelMyBooking(${b.id})" class="btn" style="padding:6px 12px; font-size:0.85em; background:#e74c3c;">Cancel</button>` : ''}
+              </div>
+            </div>
+          `).join('');
+        } else {
+          container.className = "";
+          container.innerHTML = `<div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:12px; color:#aaa;">No active reservations found under ${email}.</div>`;
+        }
+      } catch (err) {
+        container.innerHTML = `<div style="color:#e74c3c;">Error fetching your reservations.</div>`;
+      }
+    }
+
+    async function cancelMyBooking(id) {
+      if (!confirm("Are you sure you want to cancel this booking?")) return;
+      try {
+        const res = await fetch(`http://localhost:8085/api/bookings/${id}/cancel?email=${encodeURIComponent(currentUser.email)}`, { method: "POST" });
+        const data = await res.json();
+        alert(data.message);
+        loadMyBookings(currentUser.email);
+      } catch (e) {
+        alert("Error cancelling booking.");
+      }
+    }
+
+    document.getElementById("userComplaintForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const room = document.getElementById("ticketRoom").value.trim();
+      const issue = document.getElementById("ticketDesc").value.trim();
+
+      try {
+        const res = await fetch("http://localhost:8085/api/service-requests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roomNumber: room,
+            issueDescription: issue,
+            guestEmail: currentUser.email
+          })
+        });
+
+        const data = await res.json();
+        alert(`✅ Service Ticket Created! Ticket #${data.id} classified as ${data.priority} priority.`);
+        document.getElementById("userComplaintForm").reset();
+      } catch (err) {
+        alert("Error creating service ticket.");
+      }
+    });
+
+    function logoutUser() {
+      localStorage.removeItem("currentUser");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
